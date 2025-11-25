@@ -21,7 +21,7 @@ router.get("/:id", async (req, res) => {
   let { id } = req.params;
 
   try {
-    let sql = "SELECT * FROM TBL_FEED F1 INNER JOIN TBL_FEED_IMG F2 ON F1.ID = F2.FEEDID WHERE F1.USERID = ?";
+    let sql = "SELECT * FROM SNS_FEED ";
     let [list] = await db.query(sql, [id]);
     res.json({
       list: list,
@@ -51,11 +51,12 @@ router.delete("/:feedNo", authMiddleware, async (req, res) => {
 });
 
 router.post("/", authMiddleware, async (req, res) => {
-  let { content, userId } = req.body;
+  let { content, userId, nickname, codepenUrl } = req.body;
 
   try {
-    let sql = "INSERT INTO TBL_FEED(USERID , CONTENT , CDATETIME) VALUES(?, ? ,NOW())";
-    let result = await db.query(sql, [userId, content]);
+    let sql =
+      "INSERT INTO SNS_FEED(USERID , NICKNAME , CONTENTS,CDATETIME,UDATETIME,CODEPENURL) VALUES(?, ?,? ,NOW(),NOW(),?)";
+    let result = await db.query(sql, [userId, nickname, content, codepenUrl]);
     res.json({
       result: result,
       msg: "추가되었습니다.",

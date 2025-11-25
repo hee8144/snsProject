@@ -14,15 +14,39 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/join", async (req, res) => {
-  let { Id, Pwd, Name } = req.body;
+  let { Id, Pwd, Name, Nickname, gender, phone, birth } = req.body;
   try {
     const hashPwd = await bcrypt.hash(Pwd, 10);
+    let sql = "INSERT INTO SNS_USER VALUES(?,?,?,?,?,null,?,null,NOW(),NOW(),?)";
     console.log(hashPwd);
-    let sql = "INSERT INTO TBL_USER(USERID,PWD,USERNAME,CDATETIME,UDATETIME) VALUES(?,?,?,NOW(),NOW())";
-    let result = await db.query(sql, [Id, hashPwd, Name]);
+    let result = await db.query(sql, [Id, hashPwd, Name, Nickname, gender, phone, birth]);
     res.json({
       result: result,
       msg: "success",
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.get("/Idcheck/:id", async (req, res) => {
+  let { id } = req.params;
+  let msg = "";
+  let result = false;
+  try {
+    let sql = "SELECT * FROM SNS_USER WHERE USERID = ? ";
+    let [list] = await db.query(sql, [id]);
+
+    if (list.length > 0) {
+      result = false;
+      msg = "사용중인 아이디입니다.";
+    } else {
+      result = true;
+      msg = "사용가능한 아이디입니다.";
+    }
+    res.json({
+      result: result,
+      msg: msg,
     });
   } catch (error) {
     console.log(error);
@@ -37,7 +61,7 @@ router.post("/", async (req, res) => {
     let result = "fail";
     let token = null;
 
-    let sql = "SELECT * FROM TBL_USER WHERE USERID = ?";
+    let sql = "SELECT * FROM SNS_USER WHERE USERID = ?";
     let [list] = await db.query(sql, [Id]);
     if (list.length > 0) {
       const match = await bcrypt.compare(Pwd, list[0].pwd);

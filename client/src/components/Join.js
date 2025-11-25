@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   TextField,
   Button,
@@ -14,37 +14,101 @@ import {
   FormControl,
   FormLabel,
 } from "@mui/material";
-
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Link, useNavigate } from "react-router-dom";
-import { useRef } from "react";
 
 function Join() {
-  const [phone1, setPhone1] = React.useState("010");
+  const [phone1, setPhone1] = useState("010");
+  const [phone2, setPhone2] = useState("");
+  const [phone3, setPhone3] = useState("");
+  const [pwd, setPwd] = useState("");
+  const [pwdCheck, setPwdCheck] = useState("");
+  const [gender, setGender] = useState("m");
+  const [birth, setBirth] = useState();
+  const [pwdError, setPwdError] = useState(false);
+
+  const [idFlg, setIdFlg] = useState(false);
 
   let idRef = useRef();
-  let pwdRef = useRef();
   let nameRef = useRef();
+  let nickRef = useRef();
   let navigate = useNavigate();
 
-  const handleChange = (event) => {
-    setPhone1(event.target.value);
-  };
+  const phone = `${phone1}-${phone2}-${phone3}`;
+
+  useEffect(() => {
+    if (pwdCheck === "") {
+      setPwdError(false);
+    } else {
+      setPwdError(pwd !== pwdCheck);
+    }
+  }, [pwd, pwdCheck]);
+
+  function IdCheck() {
+    const id = idRef.current.value.trim();
+    if (id.length < 4) {
+      alert("아이디는 4글자 이상이어야 합니다.");
+      return;
+    }
+
+    fetch("http://localhost:3010/user/Idcheck/" + id)
+      .then((res) => res.json())
+      .then((data) => {
+        setIdFlg(data.result);
+        alert(data.msg);
+      });
+  }
 
   function join() {
+    const id = idRef.current.value.trim();
+    const name = nameRef.current.value.trim();
+    const nick = nickRef.current.value.trim();
+
+    if (id.length < 4) {
+      return alert("아이디는 4글자 이상 입력하세요.");
+    }
+    if (!idFlg) {
+      return alert("아이디 중복확인을 해주세요.");
+    }
+    if (pwd.length < 6) {
+      return alert("비밀번호는 6자리 이상이어야 합니다.");
+    }
+    if (pwdError) {
+      return alert("비밀번호가 일치하지 않습니다.");
+    }
+    if (name === "") {
+      return alert("이름을 입력해주세요.");
+    }
+    if (nick === "") {
+      return alert("닉네임을 입력해주세요.");
+    }
+    if (phone2.length < 3 || phone3.length < 4) {
+      return alert("전화번호를 올바르게 입력해주세요.");
+    }
+    if (!birth) {
+      return alert("생년월일을 선택해주세요.");
+    }
+
     fetch("http://localhost:3010/user/join", {
       method: "POST",
       headers: {
         "Content-type": "application/json",
       },
       body: JSON.stringify({
-        Id: idRef.current.value,
-        Pwd: pwdRef.current.value,
-        Name: nameRef.current.value,
+        Id: id,
+        Pwd: pwd,
+        Name: name,
+        Nickname: nick,
+        phone: phone,
+        gender: gender,
+        birth: birth.format("YYYY-MM-DD"),
       }),
     })
       .then((res) => res.json())
       .then((data) => {
-        alert("가입되엇습니다.");
+        alert("가입되었습니다.");
         navigate("/");
       });
   }
@@ -55,31 +119,83 @@ function Join() {
         <Typography variant="h4" gutterBottom>
           회원가입
         </Typography>
-        <TextField inputRef={idRef} label="ID" variant="outlined" margin="normal" fullWidth />
+
+        {/* ID */}
+        <Box display="flex" gap={2} width="100%" alignItems="center">
+          <TextField inputRef={idRef} label="ID" variant="outlined" margin="normal" fullWidth />
+          <Button variant="contained" sx={{ height: "56px", minWidth: "100px" }} onClick={IdCheck}>
+            중복확인
+          </Button>
+        </Box>
+
+        {/* 이름 */}
         <TextField inputRef={nameRef} label="Username" variant="outlined" margin="normal" fullWidth />
-        <TextField inputRef={pwdRef} label="Password" variant="outlined" margin="normal" fullWidth type="password" />
-        <TextField inputRef={nameRef} label="Nickname" variant="outlined" margin="normal" fullWidth />
-        <TextField inputRef={nameRef} label="Addr" variant="outlined" margin="normal" fullWidth />
-        <Box width={"100%"} display="flex" flexDirection="rows" alignItems="center" justifyContent="space-between">
-          <InputLabel id="demo-simple-select-label" style={{ marginLeft: "14px" }}>
-            phone
-          </InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={phone1}
-            label="phone1"
-            sx={{ maxWidth: 100, mr: 4 }}
-            onChange={handleChange}
-          >
+
+        {/* 비밀번호 */}
+        <TextField
+          onChange={(e) => setPwd(e.target.value)}
+          label="Password"
+          variant="outlined"
+          margin="normal"
+          fullWidth
+          type="password"
+        />
+
+        {/* 비밀번호 확인 */}
+        <TextField
+          onChange={(e) => setPwdCheck(e.target.value)}
+          label="PasswordChecks"
+          variant="outlined"
+          margin="normal"
+          fullWidth
+          type="password"
+          error={pwdError}
+          helperText={pwdError ? "비밀번호가 일치하지 않습니다." : "비밀번호가 일치합니다"}
+        />
+
+        {/* 닉네임 */}
+        <TextField inputRef={nickRef} label="Nickname" variant="outlined" margin="normal" fullWidth />
+
+        {/* 전화번호 */}
+        <Box width="100%" marginTop="16px" display="flex" alignItems="center" gap={1}>
+          <InputLabel sx={{ marginLeft: "14px", whiteSpace: "nowrap" }}>phone</InputLabel>
+
+          <Select value={phone1} onChange={(e) => setPhone1(e.target.value)} size="small" sx={{ width: 80 }}>
             <MenuItem value={"010"}>010</MenuItem>
             <MenuItem value={"011"}>011</MenuItem>
             <MenuItem value={"012"}>012</MenuItem>
           </Select>
-          <TextField inputRef={nameRef} label="Phone" sx={{ maxWidth: 80, mr: 4 }} variant="outlined" fullWidth />
-          <TextField inputRef={nameRef} sx={{ maxWidth: 80 }} label="Phone" variant="outlined" fullWidth />
+
+          <Box>-</Box>
+
+          <TextField
+            value={phone2}
+            onChange={(e) => setPhone2(e.target.value.replace(/[^0-9]/g, ""))}
+            inputProps={{ maxLength: 4 }}
+            size="small"
+            sx={{ width: 80 }}
+          />
+
+          <Box>-</Box>
+
+          <TextField
+            value={phone3}
+            onChange={(e) => setPhone3(e.target.value.replace(/[^0-9]/g, ""))}
+            inputProps={{ maxLength: 4 }}
+            size="small"
+            sx={{ width: 80 }}
+          />
         </Box>
 
+        {/* 생년월일 */}
+        <Box width="100%" marginTop="16px" display="flex" alignItems="center" gap={1}>
+          <InputLabel sx={{ marginLeft: "14px", marginRight: "12px" }}>birth</InputLabel>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker value={birth} onChange={setBirth} />
+          </LocalizationProvider>
+        </Box>
+
+        {/* 성별 */}
         <FormControl
           style={{
             display: "flex",
@@ -87,35 +203,29 @@ function Join() {
             flexDirection: "row",
             width: "100%",
             justifyContent: "space-between",
+            marginTop: "16px",
           }}
         >
-          <FormLabel style={{ marginLeft: "14px" }} id="demo-row-radio-buttons-group-label">
-            Gender
-          </FormLabel>
+          <FormLabel style={{ marginLeft: "14px" }}>Gender</FormLabel>
           <RadioGroup
-            style={{ width: "100%", justifyContent: "space-evenly" }}
             row
-            aria-labelledby="demo-row-radio-buttons-group-label"
             name="row-radio-buttons-group"
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            style={{ width: "100%", justifyContent: "space-evenly" }}
           >
-            <FormControlLabel value="female" control={<Radio />} label="Female" />
-            <FormControlLabel value="male" control={<Radio />} label="Male" />
+            <FormControlLabel value="f" control={<Radio />} label="Female" />
+            <FormControlLabel value="m" control={<Radio />} label="Male" />
           </RadioGroup>
         </FormControl>
 
-        <Button
-          onClick={() => {
-            join();
-          }}
-          variant="contained"
-          color="primary"
-          fullWidth
-          style={{ marginTop: "20px" }}
-        >
+        {/* 회원가입 버튼 */}
+        <Button onClick={join} variant="contained" color="primary" fullWidth style={{ marginTop: "20px" }}>
           회원가입
         </Button>
+
         <Typography variant="body2" style={{ marginTop: "10px" }}>
-          이미 회원이라면? <Link to="/login">로그인</Link>
+          이미 회원이라면? <Link to="/">로그인</Link>
         </Typography>
       </Box>
     </Container>
