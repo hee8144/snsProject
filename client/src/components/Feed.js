@@ -1,19 +1,13 @@
-import React, { useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import {
-  Grid,
   AppBar,
   Toolbar,
   Typography,
   Container,
   Box,
   Card,
-  CardMedia,
   CardContent,
-  Dialog,
-  DialogTitle,
-  DialogContent,
   IconButton,
-  DialogActions,
   Button,
   TextField,
   List,
@@ -22,105 +16,201 @@ import {
   ListItemAvatar,
   Avatar,
   CardActions,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import CloseIcon from "@mui/icons-material/Close";
-import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 
 function Feed() {
+  // 피드 & 사용자
+  const [feed, setFeed] = useState([]);
+  const [userid, setUserId] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [favList, setFavList] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedFeedNo, setSelectedFeedNo] = useState(null);
+
+  // 댓글
   const [commentsVisible, setCommentsVisible] = useState({});
-  const [open, setOpen] = useState(false);
-  const [selectedFeed, setSelectedFeed] = useState(null);
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState("");
+  const [comments, setComments] = useState({}); // feedNo별
+  const [newComments, setNewComments] = useState({});
+  const [editMode, setEditMode] = useState(null);
+  const [editValue, setEditValue] = useState({});
+  const [commentCount, setCommentCount] = useState({}); // feedNo별
 
-  let [feed, setFeed] = useState([]);
-  let [userid, setUserId] = useState("");
-  function getFeedList() {
-    let token = localStorage.getItem("token");
-    if (token) {
-      const decoded = jwtDecode(token);
-      setUserId(decoded.userId);
-      fetch("http://localhost:3010/feed/" + decoded.userId)
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
+  // --- 초기 데이터 로드 ---
+  const fnFavList = useCallback(() => {
+    if (!userid) return;
+    fetch("http://localhost:3010/feed/fav/" + userid, {
+      method: "GET",
+      headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+    })
+      .then((res) => res.json())
+      .then((data) => setFavList(data.fav));
+  }, [userid]);
 
-          setFeed(data.list);
-        });
-    } else {
+  const getFeedList = useCallback(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
       alert("로그인하세요");
       window.location.href = "/";
+      return;
     }
-  }
+    const decoded = jwtDecode(token);
+    setUserId(decoded.userId);
+    setNickname(decoded.NICKNAME);
+
+    fetch("http://localhost:3010/feed/" + decoded.userId)
+      .then((res) => res.json())
+      .then((data) => {
+        setFeed(data.list);
+        // 초기 댓글 개수
+        const counts = {};
+        data.cnt.forEach((c) => {
+          counts[c.feed_no] = c.cnt;
+        });
+        setCommentCount(counts);
+        fnFavList();
+      });
+  }, [fnFavList]);
 
   useEffect(() => {
     getFeedList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getFeedList]);
+
+  // --- 댓글 관련 ---
+  const fnCommentList = useCallback((feedNo) => {
+    fetch("http://localhost:3010/feed/comment/" + feedNo)
+      .then((res) => res.json())
+      .then((data) => setComments((prev) => ({ ...prev, [feedNo]: data.comment })));
   }, []);
 
-  function fnRemove(feedNo) {
-    fetch("http://localhost:3010/feed/" + feedNo, {
-      method: "DELETE",
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+  const handleToggleComments = (feedNo) => {
+    setCommentsVisible((prev) => ({ ...prev, [feedNo]: !prev[feedNo] }));
+    if (!comments[feedNo]) fnCommentList(feedNo);
+  };
+
+  const fnadd = (feedNo) => {
+    const content = newComments[feedNo]?.trim();
+    if (!content) return;
+
+    fetch("http://localhost:3010/feed/comment/", {
+      method: "POST",
+      headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
+      body: JSON.stringify({ feedNo, userid, contents: content, nickname }),
     })
       .then((res) => res.json())
       .then((data) => {
+        const newCmt = {
+          sns_commentNo: data.result?.insertId || Date.now(),
+          FEEDNO: feedNo,
+          userId: userid,
+          NICKNAME: nickname,
+          CONTENTS: content,
+          CDATETIME: new Date().toLocaleString(),
+        };
+        setComments((prev) => ({
+          ...prev,
+          [feedNo]: [...(prev[feedNo] || []), newCmt],
+        }));
+        setNewComments((prev) => ({ ...prev, [feedNo]: "" }));
+        setCommentCount((prev) => ({ ...prev, [feedNo]: (prev[feedNo] || 0) + 1 }));
         alert(data.msg);
-        handleClose();
-        getFeedList();
       });
-  }
-  const handleClickOpen = (feed) => {
-    console.log(feed);
-
-    setSelectedFeed(feed);
-    setOpen(true);
-    setComments([
-      { id: "user1", text: "멋진 사진이에요!" },
-      { id: "user2", text: "이 장소에 가보고 싶네요!" },
-      { id: "user3", text: "아름다운 풍경이네요!" },
-    ]); // 샘플 댓글 추가
-    setNewComment(""); // 댓글 입력 초기화
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedFeed(null);
-    setComments([]); // 모달 닫을 때 댓글 초기화
+  const fndelete = (feedNo, cmtNo) => {
+    if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
+
+    fetch("http://localhost:3010/feed/comment/" + cmtNo, {
+      method: "DELETE",
+      headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setComments((prev) => ({
+          ...prev,
+          [feedNo]: prev[feedNo].filter((c) => c.sns_commentNo !== cmtNo),
+        }));
+        setCommentCount((prev) => ({ ...prev, [feedNo]: (prev[feedNo] || 1) - 1 }));
+        alert(data.msg);
+      });
   };
+
+  const fnSave = (feedNo, cmt) => {
+    fetch("http://localhost:3010/feed/comment/" + cmt.sns_commentNo, {
+      method: "PUT",
+      headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
+      body: JSON.stringify({ contents: editValue[cmt.sns_commentNo] }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setComments((prev) => ({
+          ...prev,
+          [feedNo]: prev[feedNo].map((c) =>
+            c.sns_commentNo === cmt.sns_commentNo ? { ...c, CONTENTS: editValue[cmt.sns_commentNo] } : c
+          ),
+        }));
+        setEditMode(null);
+        alert(data.msg);
+      });
+  };
+
+  const handleEditComment = (cmt) => {
+    setEditMode(cmt.sns_commentNo);
+    setEditValue((prev) => ({ ...prev, [cmt.sns_commentNo]: cmt.CONTENTS }));
+  };
+
+  // --- 좋아요 ---
+  const fnAddFav = (feedNo) =>
+    fetch("http://localhost:3010/feed/fav/", {
+      method: "POST",
+      headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
+      body: JSON.stringify({ feedNo, userid }),
+    }).then((res) => res.json());
+
+  const fnDeleteFav = (feedNo) =>
+    fetch("http://localhost:3010/feed/fav/", {
+      method: "DELETE",
+      headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
+      body: JSON.stringify({ feedNo, userid }),
+    }).then((res) => res.json());
+
+  const fnFav = (feedNo) => {
+    const isFav = favList.map((f) => f.FEED_NO).includes(feedNo);
+    if (isFav) fnDeleteFav(feedNo).then(() => fnFavList());
+    else fnAddFav(feedNo).then(() => fnFavList());
+  };
+
+  const handleMenuOpen = (event, feedNo) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedFeedNo(feedNo);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedFeedNo(null);
+  };
+
+  const favSet = new Set(favList.map((f) => f.FEED_NO));
 
   const getEmbedUrl = (url) => {
     if (!url) return null;
-    try {
-      const regex = /https:\/\/codepen\.io\/([^/]+)\/pen\/([^/]+)/;
-      const match = url.match(regex);
-      if (match) {
-        const username = match[1];
-        const penId = match[2];
-        return `https://codepen.io/${username}/embed/${penId}?height=400&theme-id=dark&default-tab=result`;
-      }
-    } catch (err) {
-      console.error("CodePen URL 변환 실패", err);
-    }
+    const regex = /https:\/\/codepen\.io\/([^/]+)\/pen\/([^/]+)/;
+    const match = url?.match(regex);
+    if (match) return `https://codepen.io/${match[1]}/embed/${match[2]}?height=400&theme-id=dark&default-tab=result`;
     return null;
   };
+  //feed
 
-  const handleToggleComments = (id) => {
-    setCommentsVisible((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const handleAddComment = (id) => {
-    if (newComment[id]?.trim()) {
-      const commentText = newComment[id];
-
-      setNewComment((prev) => ({ ...prev, [id]: "" }));
-    }
-  };
+  const fnDeleteFeed = (feedNo) =>
+    fetch("http://localhost:3010/feed" + feedNo, {
+      method: "DELETE",
+      headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
+      body: JSON.stringify({ feedNo }),
+    }).then((res) => res.json());
 
   return (
     <Container maxWidth="md">
@@ -135,55 +225,137 @@ function Feed() {
           const embedUrl = getEmbedUrl(item.codepenUrl);
           return (
             <Card key={item.feed_no} sx={{ width: "70%", margin: "16px auto 0px" }}>
-              {item.imgPath && <CardMedia component="img" height="300" image={item.imgPath} alt={item.imgName} />}
               <CardContent>
-                <Typography variant="subtitle2" color="textSecondary">
-                  {item.nickname || item.userId}
-                </Typography>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Typography variant="subtitle1" color="textSecondary">
+                    {item.nickname || item.userId}
+                  </Typography>
+                  {item.userId === userid && (
+                    <>
+                      <IconButton onClick={(e) => handleMenuOpen(e, item.feed_no)}>
+                        <MoreVertIcon />
+                      </IconButton>
+                      <Menu
+                        anchorEl={anchorEl}
+                        open={selectedFeedNo === item.feed_no}
+                        onClose={handleMenuClose}
+                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                        transformOrigin={{ vertical: "top", horizontal: "right" }}
+                      >
+                        <MenuItem onClick={() => handleMenuClose()}>수정</MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            fnDeleteFeed(item.feed_no);
+                          }}
+                        >
+                          삭제
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  )}
+                </Box>
                 <Typography variant="body1">{item.CONTENTS}</Typography>
-                {embedUrl && (
-                  <Box sx={{ mt: 1 }}>
-                    <iframe
-                      src={embedUrl}
-                      height="400"
-                      style={{ width: "100%" }}
-                      frameBorder="0"
-                      allowFullScreen
-                    ></iframe>
-                  </Box>
-                )}
+                {embedUrl && <iframe src={embedUrl} style={{ width: "100%", height: 400 }} frameBorder="0" />}
               </CardContent>
+
               <CardActions>
-                <IconButton>
-                  <FavoriteIcon></FavoriteIcon>
+                <IconButton onClick={() => fnFav(item.feed_no)}>
+                  <FavoriteIcon color={favSet.has(item.feed_no) ? "error" : "inherit"} />
                 </IconButton>
-                <IconButton
-                  aria-label="add to favorites"
-                  onClick={() => {
-                    handleToggleComments(item.feed_no);
-                  }}
-                >
+                <IconButton onClick={() => handleToggleComments(item.feed_no)}>
                   <ChatBubbleOutlineIcon />
+                  <Typography sx={{ ml: 0.5, fontSize: "14px" }}>{commentCount[item.feed_no] || 0}</Typography>
                 </IconButton>
               </CardActions>
-              {/*  */}
-              {/* 댓글 영역 */}
 
+              {/* 댓글 리스트 */}
               {commentsVisible[item.feed_no] && (
-                <Box display="flex" alignItems={"center"} gap={"12px"} padding={"16px"}>
-                  {userid}
-                  <TextField
-                    variant="outlined"
-                    size="small"
-                    style={{ width: "80%" }}
-                    placeholder="댓글을 입력하세요"
-                    value={newComment[item.id] || ""}
-                    onChange={(e) => setNewComment((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                  />
-                  <Button variant="contained" onClick={() => handleAddComment(item.id)}>
-                    추가
-                  </Button>
-                </Box>
+                <>
+                  <List sx={{ width: "100%", paddingX: 2 }}>
+                    {comments[item.feed_no]?.length > 0 ? (
+                      comments[item.feed_no].map((cmt) => (
+                        <ListItem
+                          key={cmt.sns_commentNo}
+                          alignItems="flex-start"
+                          style={{ borderTop: "1px solid #ccc" }}
+                          secondaryAction={
+                            editMode !== cmt.sns_commentNo &&
+                            cmt.userId === userid && (
+                              <Box>
+                                <Button size="small" onClick={() => handleEditComment(cmt)}>
+                                  수정
+                                </Button>
+                                <Button
+                                  size="small"
+                                  color="error"
+                                  onClick={() => fndelete(item.feed_no, cmt.sns_commentNo)}
+                                >
+                                  삭제
+                                </Button>
+                              </Box>
+                            )
+                          }
+                        >
+                          <ListItemAvatar>
+                            <Avatar>{cmt.NICKNAME.charAt(0).toUpperCase()}</Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={cmt.NICKNAME}
+                            secondary={
+                              editMode === cmt.sns_commentNo ? (
+                                <Box display="flex" gap={1} alignItems="center">
+                                  <TextField
+                                    size="small"
+                                    sx={{ flex: 1 }}
+                                    value={editValue[cmt.sns_commentNo]}
+                                    onChange={(e) =>
+                                      setEditValue((prev) => ({ ...prev, [cmt.sns_commentNo]: e.target.value }))
+                                    }
+                                  />
+                                  <Button size="small" variant="contained" onClick={() => fnSave(item.feed_no, cmt)}>
+                                    저장
+                                  </Button>
+                                  <Button size="small" onClick={() => setEditMode(null)}>
+                                    취소
+                                  </Button>
+                                </Box>
+                              ) : (
+                                <>
+                                  {cmt.CONTENTS}
+                                  <Typography sx={{ fontSize: 12, mt: 0.5 }} color="text.secondary">
+                                    {cmt.CDATETIME}
+                                  </Typography>
+                                </>
+                              )
+                            }
+                          />
+                        </ListItem>
+                      ))
+                    ) : (
+                      <Typography sx={{ px: 2, py: 1 }}>댓글이 없습니다.</Typography>
+                    )}
+                  </List>
+
+                  {/* 댓글 입력 */}
+                  <Box display="flex" alignItems="center" gap={1} padding={2}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      placeholder="댓글을 입력하세요"
+                      value={newComments[item.feed_no] || ""}
+                      onChange={(e) => setNewComments((prev) => ({ ...prev, [item.feed_no]: e.target.value }))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          fnadd(item.feed_no);
+                        }
+                      }}
+                    />
+                    <Button variant="contained" onClick={() => fnadd(item.feed_no)}>
+                      추가
+                    </Button>
+                  </Box>
+                </>
               )}
             </Card>
           );
