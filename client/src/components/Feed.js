@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -18,10 +18,18 @@ import {
   CardActions,
   Menu,
   MenuItem,
+  CardMedia,
+  Modal,
+  InputLabel,
 } from "@mui/material";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import { jwtDecode } from "jwt-decode";
 
 function Feed() {
@@ -32,6 +40,11 @@ function Feed() {
   const [favList, setFavList] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedFeedNo, setSelectedFeedNo] = useState(null);
+  const [images, setImages] = useState([]);
+  const [open, setOpen] = React.useState(false);
+  const [followList, setFollowList] = useState([]);
+  let content = useRef();
+  let codepen = useRef();
 
   // 댓글
   const [commentsVisible, setCommentsVisible] = useState({});
@@ -44,7 +57,7 @@ function Feed() {
   // --- 초기 데이터 로드 ---
   const fnFavList = useCallback(() => {
     if (!userid) return;
-    fetch("http://localhost:3010/feed/fav/" + userid, {
+    fetch("http://localhost:3010/fav/" + userid, {
       method: "GET",
       headers: { Authorization: "Bearer " + localStorage.getItem("token") },
     })
@@ -66,13 +79,16 @@ function Feed() {
     fetch("http://localhost:3010/feed/" + decoded.userId)
       .then((res) => res.json())
       .then((data) => {
+        console.log(data);
         setFeed(data.list);
         // 초기 댓글 개수
         const counts = {};
         data.cnt.forEach((c) => {
           counts[c.feed_no] = c.cnt;
         });
+        setImages(data.img);
         setCommentCount(counts);
+        setFollowList(data.follow);
         fnFavList();
       });
   }, [fnFavList]);
@@ -83,7 +99,7 @@ function Feed() {
 
   // --- 댓글 관련 ---
   const fnCommentList = useCallback((feedNo) => {
-    fetch("http://localhost:3010/feed/comment/" + feedNo)
+    fetch("http://localhost:3010/comment/" + feedNo)
       .then((res) => res.json())
       .then((data) => setComments((prev) => ({ ...prev, [feedNo]: data.comment })));
   }, []);
@@ -97,7 +113,7 @@ function Feed() {
     const content = newComments[feedNo]?.trim();
     if (!content) return;
 
-    fetch("http://localhost:3010/feed/comment/", {
+    fetch("http://localhost:3010/comment/", {
       method: "POST",
       headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
       body: JSON.stringify({ feedNo, userid, contents: content, nickname }),
@@ -125,7 +141,7 @@ function Feed() {
   const fndelete = (feedNo, cmtNo) => {
     if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
 
-    fetch("http://localhost:3010/feed/comment/" + cmtNo, {
+    fetch("http://localhost:3010/comment/" + cmtNo, {
       method: "DELETE",
       headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
     })
@@ -141,7 +157,7 @@ function Feed() {
   };
 
   const fnSave = (feedNo, cmt) => {
-    fetch("http://localhost:3010/feed/comment/" + cmt.sns_commentNo, {
+    fetch("http://localhost:3010/comment/" + cmt.sns_commentNo, {
       method: "PUT",
       headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
       body: JSON.stringify({ contents: editValue[cmt.sns_commentNo] }),
@@ -166,14 +182,14 @@ function Feed() {
 
   // --- 좋아요 ---
   const fnAddFav = (feedNo) =>
-    fetch("http://localhost:3010/feed/fav/", {
+    fetch("http://localhost:3010/fav/", {
       method: "POST",
       headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
       body: JSON.stringify({ feedNo, userid }),
     }).then((res) => res.json());
 
   const fnDeleteFav = (feedNo) =>
-    fetch("http://localhost:3010/feed/fav/", {
+    fetch("http://localhost:3010/fav/", {
       method: "DELETE",
       headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
       body: JSON.stringify({ feedNo, userid }),
@@ -205,13 +221,119 @@ function Feed() {
   };
   //feed
 
-  const fnDeleteFeed = (feedNo) =>
-    fetch("http://localhost:3010/feed" + feedNo, {
+  const fnDeleteFeed = (feedNo) => {
+    if (!window.confirm("게시글을 삭제하시겠습니까?")) return;
+
+    fetch("http://localhost:3010/feed/" + feedNo, {
       method: "DELETE",
       headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
       body: JSON.stringify({ feedNo }),
-    }).then((res) => res.json());
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        alert(data.msg);
+        getFeedList();
+      });
+  };
+  const fnEditFeed = (feedNo) => {
+    fetch("http://localhost:3010/feed/" + feedNo, {
+      method: "PUT",
+      headers: { "Content-type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
+      body: JSON.stringify({ feedNo, content: content.current.value, codepen: codepen.current.value }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        alert(data.msg);
+        handleClose();
+        getFeedList();
+      });
+  };
+  const FeedImages = ({ imgs }) => {
+    if (!imgs || !Array.isArray(imgs) || imgs.length === 0) return null; // 이미지 없으면 아무것도 안 보여줌
 
+    if (imgs.length === 1) {
+      return <CardMedia component="img" height="200" image={imgs[0].IMG_PATH} alt={imgs[0].IMG_NAME} />;
+    }
+
+    const PrevArrow = ({ onClick }) => (
+      <IconButton
+        onClick={onClick}
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: 0,
+          transform: "translate(0, -50%)",
+          zIndex: 1,
+          color: "white",
+        }}
+      >
+        <ArrowBackIosIcon />
+      </IconButton>
+    );
+
+    const NextArrow = ({ onClick }) => (
+      <IconButton
+        onClick={onClick}
+        sx={{
+          position: "absolute",
+          top: "50%",
+          right: 0,
+          transform: "translate(0, -50%)",
+          zIndex: 1,
+          color: "white",
+        }}
+      >
+        <ArrowForwardIosIcon />
+      </IconButton>
+    );
+
+    const settings = {
+      accessibility: true,
+      infinite: true,
+      speed: 500,
+      slidesToShow: 1,
+      slidesToScroll: 1,
+      arrows: true,
+      prevArrow: <PrevArrow />,
+      nextArrow: <NextArrow />,
+    };
+
+    return (
+      <Slider {...settings}>
+        {imgs.map((img, i) => (
+          <Box key={i}>
+            <CardMedia component="img" height="200" image={img.IMG_PATH} alt={img.IMG_NAME} />
+          </Box>
+        ))}
+      </Slider>
+    );
+  };
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  //팔로우
+  const fnFollow = (targetUserId) => {
+    const currentlyFollowing = followList.some((f) => f.followedId === targetUserId);
+
+    fetch("http://localhost:3010/follow/", {
+      method: currentlyFollowing ? "DELETE" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: JSON.stringify({ follower: userid, following: targetUserId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        alert(data.msg);
+
+        if (currentlyFollowing) {
+          setFollowList((prev) => prev.filter((f) => f.followedId !== targetUserId));
+        } else {
+          setFollowList((prev) => [...prev, { userId: userid, followedId: targetUserId, follow_date: new Date() }]);
+        }
+      });
+  };
   return (
     <Container maxWidth="md">
       <AppBar position="static">
@@ -223,38 +345,149 @@ function Feed() {
       {feed.length > 0 ? (
         feed.map((item) => {
           const embedUrl = getEmbedUrl(item.codepenUrl);
+
           return (
             <Card key={item.feed_no} sx={{ width: "70%", margin: "16px auto 0px" }}>
               <CardContent>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="subtitle1" color="textSecondary">
-                    {item.nickname || item.userId}
-                  </Typography>
-                  {item.userId === userid && (
-                    <>
-                      <IconButton onClick={(e) => handleMenuOpen(e, item.feed_no)}>
-                        <MoreVertIcon />
-                      </IconButton>
-                      <Menu
-                        anchorEl={anchorEl}
-                        open={selectedFeedNo === item.feed_no}
-                        onClose={handleMenuClose}
-                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                        transformOrigin={{ vertical: "top", horizontal: "right" }}
-                      >
-                        <MenuItem onClick={() => handleMenuClose()}>수정</MenuItem>
-                        <MenuItem
-                          onClick={() => {
-                            fnDeleteFeed(item.feed_no);
+                  <Box display="flex" justifyContent="space-between" alignItems="flex-start" width={"100%"}>
+                    <Box display="flex" alignItems="flex-start" gap={0.5}>
+                      <Avatar
+                        alt="프로필 이미지"
+                        src={item.NICKNAME === "익명의사용자" ? "" : item.profile_Path}
+                        sx={{
+                          width: 50,
+                          height: 50,
+                          border: "2px solid #1976d2",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                          mr: 1,
+                        }}
+                      />
+
+                      <Box>
+                        <Typography variant="subtitle1" color="textPrimary" fontWeight="bold">
+                          {item.NICKNAME}
+                        </Typography>
+                        {item.NICKNAME == "익명의사용자" ? (
+                          <Typography variant="caption" color="textSecondary" display="block"></Typography>
+                        ) : (
+                          <Typography variant="caption" color="textSecondary" display="block">
+                            @{item.userId}
+                          </Typography>
+                        )}
+                      </Box>
+
+                      {item.userId !== userid && item.NICKNAME != "익명의사용자" && (
+                        <Button
+                          size="small"
+                          variant={followList.some((f) => f.followedId === item.userId) ? "outlined" : "contained"}
+                          color="primary"
+                          sx={{
+                            ml: 0.5,
+                            height: 24,
+                            minWidth: 60,
+                            fontSize: 10,
+                            textTransform: "none",
+                            borderRadius: 1,
                           }}
+                          onClick={() => fnFollow(item.userId)}
                         >
-                          삭제
-                        </MenuItem>
-                      </Menu>
-                    </>
-                  )}
+                          {followList.some((f) => f.followedId === item.userId) ? "언팔 " : "팔로우"}
+                        </Button>
+                      )}
+                    </Box>
+
+                    {/* 오른쪽: 날짜 */}
+                    <Typography variant="caption" color="textSecondary">
+                      {item.CDATE}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    {item.userId === userid && (
+                      <>
+                        <IconButton onClick={(e) => handleMenuOpen(e, item.feed_no)}>
+                          <MoreVertIcon />
+                        </IconButton>
+                        <Menu
+                          anchorEl={anchorEl}
+                          open={selectedFeedNo === item.feed_no}
+                          onClose={handleMenuClose}
+                          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                          transformOrigin={{ vertical: "top", horizontal: "right" }}
+                        >
+                          <MenuItem onClick={() => handleOpen()}>수정</MenuItem>
+                          <Modal
+                            open={open}
+                            onClose={handleClose}
+                            aria-labelledby="modal-modal-title"
+                            aria-describedby="modal-modal-description"
+                          >
+                            <Box
+                              sx={{
+                                position: "absolute",
+                                top: "50%",
+                                left: "50%",
+                                transform: "translate(-50%, -50%)",
+                                width: 400,
+                                bgcolor: "background.paper",
+                                border: "2px solid #000",
+                                boxShadow: 24,
+                                p: 4,
+                              }}
+                            >
+                              <Typography textAlign={"center"} variant="h4" gutterBottom>
+                                수정
+                              </Typography>
+                              <TextField
+                                inputRef={content}
+                                defaultValue={item.CONTENTS}
+                                label="내용"
+                                variant="outlined"
+                                margin="normal"
+                                fullWidth
+                                multiline
+                                rows={4}
+                              />
+                              <TextField
+                                label="CodePen Embed URL (선택사항)"
+                                variant="outlined"
+                                margin="normal"
+                                fullWidth
+                                defaultValue={item.codepenUrl}
+                                placeholder="https://codepen.io/username/pen/abcd1234"
+                                inputRef={codepen} // useRef로 선언
+                                helperText="💡 CodePen에서 Embed URL을 복사하세요 (Share → Embed → Copy Embed URL)"
+                              />
+                              <Button
+                                onClick={() => {
+                                  fnEditFeed(item.feed_no);
+                                }}
+                                variant="contained"
+                                color="primary"
+                                fullWidth
+                                style={{ marginTop: "20px" }}
+                              >
+                                수정하기
+                              </Button>
+                            </Box>
+                          </Modal>
+                          <MenuItem
+                            onClick={() => {
+                              fnDeleteFeed(item.feed_no);
+                            }}
+                          >
+                            삭제
+                          </MenuItem>
+                        </Menu>
+                      </>
+                    )}
+                  </Box>
                 </Box>
+
                 <Typography variant="body1">{item.CONTENTS}</Typography>
+                <FeedImages imgs={images.filter((f) => f.FEED_NO == item.feed_no)} />
                 {embedUrl && <iframe src={embedUrl} style={{ width: "100%", height: 400 }} frameBorder="0" />}
               </CardContent>
 
@@ -297,7 +530,7 @@ function Feed() {
                           }
                         >
                           <ListItemAvatar>
-                            <Avatar>{cmt.NICKNAME.charAt(0).toUpperCase()}</Avatar>
+                            <Avatar src={item.profile_Path || ""}>{cmt.NICKNAME.charAt(0).toUpperCase()}</Avatar>
                           </ListItemAvatar>
                           <ListItemText
                             primary={cmt.NICKNAME}

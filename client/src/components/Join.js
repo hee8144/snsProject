@@ -13,7 +13,10 @@ import {
   FormControlLabel,
   FormControl,
   FormLabel,
+  IconButton,
+  Avatar,
 } from "@mui/material";
+import { PhotoCamera } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -28,7 +31,7 @@ function Join() {
   const [gender, setGender] = useState("m");
   const [birth, setBirth] = useState();
   const [pwdError, setPwdError] = useState(false);
-
+  let [files, setFile] = React.useState([]);
   const [idFlg, setIdFlg] = useState(false);
 
   let idRef = useRef();
@@ -108,10 +111,30 @@ function Join() {
     })
       .then((res) => res.json())
       .then((data) => {
+        fnUploadFile(data.userId);
         alert("가입되었습니다.");
+
         navigate("/");
       });
   }
+
+  //업로드
+  const fnUploadFile = (userid) => {
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    formData.append("userId", userid);
+    fetch("http://localhost:3010/user/upload", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
 
   return (
     <Container maxWidth="xs">
@@ -119,7 +142,35 @@ function Join() {
         <Typography variant="h4" gutterBottom>
           회원가입
         </Typography>
+        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" sx={{ mb: 3 }}>
+          <Avatar
+            src={files.length > 0 ? URL.createObjectURL(files[0]) : ""}
+            sx={{
+              width: 100,
+              height: 100,
+              bgcolor: "#e0e0e0",
+              border: "2px solid #ccc",
+            }}
+          />
 
+          <input
+            accept="image/*"
+            type="file"
+            id="profile-upload"
+            style={{ display: "none" }}
+            onChange={(e) => setFile(Array.from(e.target.files))}
+          />
+
+          <label htmlFor="profile-upload">
+            <IconButton component="span" color="primary" sx={{ mt: 1 }} aria-label="upload picture">
+              <PhotoCamera />
+            </IconButton>
+          </label>
+
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            {"프로필 사진 선택"}
+          </Typography>
+        </Box>
         {/* ID */}
         <Box display="flex" gap={2} width="100%" alignItems="center">
           <TextField inputRef={idRef} label="ID" variant="outlined" margin="normal" fullWidth />
