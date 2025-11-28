@@ -31,8 +31,11 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 function Feed() {
+  let navigate = useNavigate();
+
   // 피드 & 사용자
   const [feed, setFeed] = useState([]);
   const [userid, setUserId] = useState("");
@@ -53,6 +56,8 @@ function Feed() {
   const [editMode, setEditMode] = useState(null);
   const [editValue, setEditValue] = useState({});
   const [commentCount, setCommentCount] = useState({}); // feedNo별
+
+  console.log(comments);
 
   // --- 초기 데이터 로드 ---
   const fnFavList = useCallback(() => {
@@ -99,7 +104,7 @@ function Feed() {
 
   // --- 댓글 관련 ---
   const fnCommentList = useCallback((feedNo) => {
-    fetch("http://localhost:3010/comment/" + feedNo)
+    fetch("http://localhost:3010/comment/list/" + feedNo)
       .then((res) => res.json())
       .then((data) => setComments((prev) => ({ ...prev, [feedNo]: data.comment })));
   }, []);
@@ -325,6 +330,8 @@ function Feed() {
     })
       .then((res) => res.json())
       .then((data) => {
+        console.log(data);
+
         alert(data.msg);
 
         if (currentlyFollowing) {
@@ -344,7 +351,7 @@ function Feed() {
 
       {feed.length > 0 ? (
         feed.map((item) => {
-          const embedUrl = getEmbedUrl(item.codepenUrl);
+          const embedUrl = getEmbedUrl(item.CODEPENURL);
 
           return (
             <Card key={item.feed_no} sx={{ width: "70%", margin: "16px auto 0px" }}>
@@ -355,6 +362,13 @@ function Feed() {
                       <Avatar
                         alt="프로필 이미지"
                         src={item.NICKNAME === "익명의사용자" ? "" : item.profile_Path}
+                        onClick={(e) => {
+                          if (item.NICKNAME === "익명의사용자") {
+                            e.preventDefault();
+                            return;
+                          }
+                          navigate("/user/" + item.userId);
+                        }}
                         sx={{
                           width: 50,
                           height: 50,
@@ -398,8 +412,6 @@ function Feed() {
                         </Button>
                       )}
                     </Box>
-
-                    {/* 오른쪽: 날짜 */}
                     <Typography variant="caption" color="textSecondary">
                       {item.CDATE}
                     </Typography>
@@ -530,7 +542,7 @@ function Feed() {
                           }
                         >
                           <ListItemAvatar>
-                            <Avatar src={item.profile_Path || ""}>{cmt.NICKNAME.charAt(0).toUpperCase()}</Avatar>
+                            <Avatar src={cmt.profile_PATH || ""}>{cmt.NICKNAME.charAt(0).toUpperCase()}</Avatar>
                           </ListItemAvatar>
                           <ListItemText
                             primary={cmt.NICKNAME}
@@ -554,8 +566,9 @@ function Feed() {
                                 </Box>
                               ) : (
                                 <>
-                                  {cmt.CONTENTS}
-                                  <Typography sx={{ fontSize: 12, mt: 0.5 }} color="text.secondary">
+                                  <Typography component="span">{cmt.CONTENTS}</Typography>
+                                  <br />
+                                  <Typography component="span" sx={{ fontSize: 12, mt: 0.5 }} color="text.secondary">
                                     {cmt.CDATETIME}
                                   </Typography>
                                 </>
@@ -599,5 +612,4 @@ function Feed() {
     </Container>
   );
 }
-
 export default Feed;

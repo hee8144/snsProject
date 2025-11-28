@@ -120,4 +120,22 @@ router.post("/upload", upload.array("file"), async (req, res) => {
   }
 });
 
+router.get("/followfeed", async (req, res) => {
+  let { id } = req.userId;
+
+  try {
+    let sql =
+      "SELECT f.* FROM sns_feed f WHERE f.userId IN (SELECT followedId FROM following WHERE userId = ? ) OR f.userId = ? ORDER BY f.CDATETIME DESC";
+
+    let [list] = await db.query(sql, [id, id]);
+
+    res.json({
+      list: list,
+      result: "success",
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 module.exports = router;

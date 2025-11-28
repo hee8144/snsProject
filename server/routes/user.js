@@ -91,18 +91,23 @@ router.post("/", async (req, res) => {
 
 router.get("/:userId", async (req, res) => {
   let { userId } = req.params;
+  console.log(userId);
+
   try {
-    let sql = "SELECT * FROM SNS_USER u inner join sns_user_img i on u.userid = i.userid WHERE i.USERID = ?";
+    let sql = "SELECT * FROM SNS_USER u left join sns_user_img i on u.userid = i.userid WHERE u.USERID = ?";
+
     let sql2 = "SELECT COUNT(*) CNT FROM SNS_FEED WHERE USERID = ?";
     let sql3 =
       "SELECT(SELECT COUNT(*) FROM following WHERE userId = ?) AS followingCnt,(SELECT COUNT(*) FROM following WHERE followedId = ?) AS followerCnt ;";
     let sql4 = "select * from sns_feed where userid = ?";
     let sql5 = "select * from sns_fav f inner join sns_feed f1 on f.feed_no = f1.feed_NO where f.userid = ?";
+    let sql6 = "SELECT * FROM MEDIA";
     let [list] = await db.query(sql, [userId]);
     let [cnt] = await db.query(sql2, [userId]);
     let [follow] = await db.query(sql3, [userId, userId]);
     let [myfeed] = await db.query(sql4, [userId]);
     let [favfeed] = await db.query(sql5, [userId]);
+    let [img] = await db.query(sql6);
 
     res.json({
       info: list[0],
@@ -110,6 +115,8 @@ router.get("/:userId", async (req, res) => {
       follow: follow[0],
       myfeed: myfeed,
       favfeed: favfeed,
+      img: img,
+
       result: "success",
     });
   } catch (error) {

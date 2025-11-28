@@ -1,47 +1,34 @@
-import React from "react";
-import { Drawer, List, ListItem, ListItemText, Typography, Toolbar, ListItemIcon } from "@mui/material";
-import { Home, Add, AccountCircle } from "@mui/icons-material";
+import { AppBar, Toolbar, IconButton, Typography, Button } from "@mui/material";
+import HomeIcon from "@mui/icons-material/Home";
 import { Link } from "react-router-dom";
-
-function Menu() {
+import NotificationList from "./NotificationList";
+export default function Menu({ currentUserId }) {
   return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: 240, // 너비 설정
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: 240, // Drawer 내부의 너비 설정
-          boxSizing: "border-box",
-        },
-      }}
-    >
-      <Toolbar />
-      <Typography variant="h6" component="div" sx={{ p: 2 }}>
-        SNS 메뉴
-      </Typography>
-      <List>
-        <ListItem button component={Link} to="/feed">
-          <ListItemIcon>
-            <Home />
-          </ListItemIcon>
-          <ListItemText primary="피드" />
-        </ListItem>
-        <ListItem button component={Link} to="/register">
-          <ListItemIcon>
-            <Add />
-          </ListItemIcon>
-          <ListItemText primary="등록" />
-        </ListItem>
-        <ListItem button component={Link} to="/mypage">
-          <ListItemIcon>
-            <AccountCircle />
-          </ListItemIcon>
-          <ListItemText primary="마이페이지" />
-        </ListItem>
-      </List>
-    </Drawer>
+    <AppBar position="absolute" color="default" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <Toolbar>
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          SNS
+        </Typography>
+
+        <Button component={Link} to="/feed" startIcon={<HomeIcon />}>
+          전체피드
+        </Button>
+        <Button component={Link} to="/followfeed" startIcon={<HomeIcon />}>
+          팔로워/팔로잉
+        </Button>
+        <Button component={Link} to="/register" startIcon={<HomeIcon />}>
+          등록
+        </Button>
+        <Button component={Link} to="/chat" startIcon={<HomeIcon />}>
+          채팅방
+        </Button>
+        <Button component={Link} to="/mypage" startIcon={<HomeIcon />}>
+          마이페이지
+        </Button>
+        <Button>
+          <NotificationList currentUserId={currentUserId} />
+        </Button>
+      </Toolbar>
+    </AppBar>
   );
 }
-
-export default Menu;
