@@ -35,7 +35,8 @@ import { useNavigate } from "react-router-dom";
 
 function Feed() {
   let navigate = useNavigate();
-
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   // 피드 & 사용자
   const [feed, setFeed] = useState([]);
   const [userid, setUserId] = useState("");
@@ -56,8 +57,7 @@ function Feed() {
   const [editMode, setEditMode] = useState(null);
   const [editValue, setEditValue] = useState({});
   const [commentCount, setCommentCount] = useState({}); // feedNo별
-
-  console.log(comments);
+  const token = localStorage.getItem("token");
 
   // --- 초기 데이터 로드 ---
   const fnFavList = useCallback(() => {
@@ -71,7 +71,6 @@ function Feed() {
   }, [userid]);
 
   const getFeedList = useCallback(() => {
-    const token = localStorage.getItem("token");
     if (!token) {
       alert("로그인하세요");
       window.location.href = "/";
@@ -81,26 +80,39 @@ function Feed() {
     setUserId(decoded.userId);
     setNickname(decoded.NICKNAME);
 
-    fetch("http://localhost:3010/feed/" + decoded.userId)
+    fetch(`http://localhost:3010/feed/${decoded.userId}?page=${page}&limit=5`)
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
-        setFeed(data.list);
-        // 초기 댓글 개수
+        if (data.list.length === 0) {
+          setHasMore(false); // 더 이상 불러올 데이터 없음
+          return;
+        }
+
+        setFeed((prev) => [...prev, ...data.list]); // 기존 데이터에 추가
         const counts = {};
         data.cnt.forEach((c) => {
           counts[c.feed_no] = c.cnt;
         });
-        setImages(data.img);
-        setCommentCount(counts);
-        setFollowList(data.follow);
+        setCommentCount((prev) => ({ ...prev, ...counts }));
+        setImages((prev) => [...prev, ...data.img]);
+        setFollowList(data.follow); // 팔로우는 마지막 한 번만 업데이트
         fnFavList();
       });
-  }, [fnFavList]);
+  }, [page, fnFavList, token]);
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!hasMore) return;
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+        setPage((prev) => prev + 1); // 페이지 증가
+      }
+    };
 
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasMore]);
   useEffect(() => {
     getFeedList();
-  }, [getFeedList]);
+  }, [getFeedList, page]);
 
   // --- 댓글 관련 ---
   const fnCommentList = useCallback((feedNo) => {
@@ -330,8 +342,6 @@ function Feed() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
-
         alert(data.msg);
 
         if (currentlyFollowing) {
@@ -343,12 +353,6 @@ function Feed() {
   };
   return (
     <Container maxWidth="md">
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6">SNS</Typography>
-        </Toolbar>
-      </AppBar>
-
       {feed.length > 0 ? (
         feed.map((item) => {
           const embedUrl = getEmbedUrl(item.CODEPENURL);
@@ -608,6 +612,9 @@ function Feed() {
         })
       ) : (
         <Typography sx={{ mt: 4 }}>등록된 피드가 없습니다.</Typography>
+      )}
+      {!hasMore && feed.length > 0 && (
+        <Typography sx={{ textAlign: "center", my: 4, color: "text.secondary" }}>더 이상 글은 없습니다.</Typography>
       )}
     </Container>
   );

@@ -70,7 +70,7 @@ router.post("/", async (req, res) => {
       if (match) {
         msg = list[0].userId + "님 환영합니다!";
         result = "success";
-        token = jwt.sign(list[0], JWT_KEY, { expiresIn: "1h" });
+        token = jwt.sign(list[0], JWT_KEY, { expiresIn: "10h" });
       } else {
         result = "fail";
         msg = "비밀번호확인하세요";
@@ -126,10 +126,10 @@ router.get("/:userId", async (req, res) => {
 
 router.put("/:userid", authMiddleware, async (req, res) => {
   let { userid } = req.params;
-  let { content } = req.body;
+  let { nickname, intro } = req.body;
   try {
-    let sql = "UPDATE SNS_USER SET INTRO = ? WHERE USERID = ?";
-    let result = await db.query(sql, [content, userid]);
+    let sql = "UPDATE SNS_USER SET  NICKNAME = ? ,  INTRO = ? WHERE USERID = ?";
+    let result = await db.query(sql, [nickname, intro, userid]);
     res.json({
       result: result,
       msg: "수정되었습니다.",
@@ -167,4 +167,45 @@ router.post("/upload", upload.array("file"), async (req, res) => {
   }
 });
 
+router.post("/checkPw", async (req, res) => {
+  const { userId, password } = req.body;
+
+  try {
+    const [rows] = await db.query("SELECT pwd FROM SNS_USER WHERE userid = ?", [userId]);
+    console.log(rows);
+
+    if (rows.length === 0) return res.json({ valid: false });
+
+    const hash = rows[0].pwd; // DB에 저장된 해쉬
+    console.log(hash);
+
+    const isMatch = await bcrypt.compare(password, hash);
+
+    res.json({ valid: isMatch });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ valid: false });
+  }
+});
+
+router.get("/isFollowing/:targetId", authMiddleware, async (req, res) => {
+  const userId = req.user.userId; // 로그인한 내 ID
+  const { targetId } = req.params; // 확인하고 싶은 상대 ID
+
+  try {
+    const sql = `
+      SELECT COUNT(*) AS cnt
+      FROM following
+      WHERE userId = ? AND followedId = ?
+    `;
+    const [[result]] = await db.query(sql, [userId, targetId]);
+
+    res.json({
+      isFollowing: result.cnt > 0,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "서버 오류" });
+  }
+});
 module.exports = router;

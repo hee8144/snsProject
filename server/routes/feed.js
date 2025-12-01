@@ -19,28 +19,42 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   let { id } = req.params;
-  console.log(id);
+  let page = parseInt(req.query.page) || 1; // 페이지 번호
+  let limit = parseInt(req.query.limit) || 5; // 한 페이지 글 수
+  let offset = (page - 1) * limit;
 
   try {
-    let sql =
-      "select f.feed_no , f.userId ,f.NICKNAME,f.CONTENTS,f.CODEPENURL, m1.*,i.profile_name,i.profile_Path, date_format(f.CDATETIME , '%Y-%m-%d %H:%i') CDATE from sns_feed f left join (select * from media where order_index = 1) m1 on f.feed_no = m1.feed_no  left join sns_user_img i on f.userId = i.userId order by f.cdatetime desc ";
+    let sql = `
+      SELECT f.feed_no, f.userId, f.NICKNAME, f.CONTENTS, f.CODEPENURL,
+             m1.*, i.profile_name, i.profile_Path,
+             DATE_FORMAT(f.CDATETIME, '%Y-%m-%d %H:%i') CDATE
+      FROM sns_feed f
+      LEFT JOIN (SELECT * FROM media WHERE order_index = 1) m1 ON f.feed_no = m1.feed_no
+      LEFT JOIN sns_user_img i ON f.userId = i.userId
+      ORDER BY f.CDATETIME DESC
+      LIMIT ? OFFSET ?
+    `;
+    let [list] = await db.query(sql, [limit, offset]);
+
+    // 댓글 개수, 이미지, 팔로우는 그대로
     let sql2 =
-      "select  f.feed_no , count(*) cnt  from sns_feed f inner join sns_comment c on f.feed_no = c.feed_no group by f.feed_no";
+      "SELECT f.feed_no, COUNT(*) cnt FROM sns_feed f INNER JOIN sns_comment c ON f.feed_no = c.feed_no GROUP BY f.feed_no";
     let sql3 = "SELECT * FROM MEDIA";
     let sql4 = "SELECT * FROM FOLLOWING WHERE USERID = ?";
-    let [list] = await db.query(sql);
     let [cnt] = await db.query(sql2);
     let [img] = await db.query(sql3);
     let [follow] = await db.query(sql4, [id]);
+
     res.json({
-      list: list,
-      cnt: cnt,
-      img: img,
-      follow: follow,
+      list,
+      cnt,
+      img,
+      follow,
       result: "success",
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ result: "error", msg: "서버 에러" });
   }
 });
 

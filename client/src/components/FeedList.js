@@ -85,7 +85,7 @@ export default function FeedList({ feedList, currentUserId, refresh }) {
   const toggleComments = (feedNo) => {
     setCommentsVisible((prev) => ({ ...prev, [feedNo]: !prev[feedNo] }));
     if (!comments[feedNo]) {
-      fetch(`http://localhost:3010/comment/${feedNo}`)
+      fetch(`http://localhost:3010/comment/list/${feedNo}`)
         .then((res) => res.json())
         .then((data) => {
           setComments((prev) => ({ ...prev, [feedNo]: data.comment }));
