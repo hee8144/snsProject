@@ -36,7 +36,6 @@ router.get("/:id", async (req, res) => {
     `;
     let [list] = await db.query(sql, [limit, offset]);
 
-    // 댓글 개수, 이미지, 팔로우는 그대로
     let sql2 =
       "SELECT f.feed_no, COUNT(*) cnt FROM sns_feed f INNER JOIN sns_comment c ON f.feed_no = c.feed_no GROUP BY f.feed_no";
     let sql3 = "SELECT * FROM MEDIA";
@@ -107,8 +106,6 @@ router.post("/upload", upload.array("file"), async (req, res) => {
   const files = req.files;
   console.log(files.file);
 
-  // const filename = req.file.filename;
-  // const destination = req.file.destination;
   try {
     let results = [];
     let host = `${req.protocol}://${req.get("host")}/`;

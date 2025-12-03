@@ -68,7 +68,7 @@ function Register() {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
-        // window.navigate("/feed"); // 원하는 경로
+        window.navigate("/feed"); // 원하는 경로
       })
       .catch((err) => {
         console.error(err);
@@ -100,7 +100,7 @@ function Register() {
           margin="normal"
           fullWidth
           placeholder="https://codepen.io/username/pen/abcd1234"
-          inputRef={codepenRef} // useRef로 선언
+          inputRef={codepenRef}
           helperText="💡 CodePen에서 Embed URL을 복사하세요 (Share → Embed → Copy Embed URL)"
         />
 

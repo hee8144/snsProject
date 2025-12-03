@@ -15,7 +15,7 @@ export default function UserPage() {
   const [myFeedList, setMyFeedList] = useState([]);
   const [favFeedList, setFavFeedList] = useState([]);
   const [images, setImages] = useState([]);
-  const [currentUserId, setCurrentUserId] = useState(""); // 로그인한 사용자 ID
+  const [currentUserId, setCurrentUserId] = useState("");
 
   const fetchUserData = (userId) => {
     fetch(`http://localhost:3010/user/${userId}`)
@@ -27,7 +27,6 @@ export default function UserPage() {
         setMyFeedList(data.myfeed);
         setFavFeedList(data.favfeed);
         setImages(data.img);
-        console.log(data);
       })
       .catch((err) => console.log(err));
   };
@@ -46,7 +45,6 @@ export default function UserPage() {
       userIdFromToken = decoded.userId;
       setCurrentUserId(userIdFromToken);
     } catch (err) {
-      console.log("JWT decode error:", err);
       localStorage.removeItem("token");
       navigate("/");
       return;
@@ -74,7 +72,7 @@ export default function UserPage() {
             favFeedList={favFeedList}
             images={images}
             refresh={() => fetchUserData(paramUserId)}
-            currentUserId={currentUserId} // 탭에서도 필요하면 전달
+            currentUserId={currentUserId}
           />
         </Paper>
       </Box>

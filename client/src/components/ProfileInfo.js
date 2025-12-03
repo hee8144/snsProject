@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Avatar, Typography, Grid, Button, Modal, TextField } from "@mui/material";
+import { Box, Avatar, Typography, Button, Modal, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 export default function ProfileInfo({ user, userId, follow, feedCount, currentUserId, refresh }) {
@@ -39,7 +39,7 @@ export default function ProfileInfo({ user, userId, follow, feedCount, currentUs
 
   const toggleFollow = async () => {
     const token = localStorage.getItem("token");
-    const res = await fetch(`http://localhost:3010/follow`, {
+    await fetch(`http://localhost:3010/follow`, {
       method: isFollowing ? "DELETE" : "POST",
       headers: {
         "Content-Type": "application/json",

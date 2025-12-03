@@ -6,7 +6,6 @@ import ChatIcon from "@mui/icons-material/Chat";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Link } from "react-router-dom";
 import NotificationList from "./NotificationList";
 

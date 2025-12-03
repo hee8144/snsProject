@@ -35,13 +35,10 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log(`User Connected: ${socket.id}`);
-
   // 채팅방 참여
   socket.on("join_room", async ({ sender, receiver }) => {
     const room = receiver ? [sender, receiver].sort().join("_") : "public";
     socket.join(room);
-    console.log(`${sender} joined room: ${room}`);
 
     if (receiver) {
       try {
@@ -64,9 +61,7 @@ io.on("connection", (socket) => {
         );
 
         io.to(room).emit("update_messages", rows);
-      } catch (err) {
-        console.error("❌ 읽음 처리 오류:", err);
-      }
+      } catch (err) {}
     }
   });
 
@@ -125,16 +120,10 @@ io.on("connection", (socket) => {
           read_status: 0,
         });
       }
-    } catch (err) {
-      console.error("❌ 메시지 전송 오류:", err);
-    }
+    } catch (err) {}
   });
 
-  socket.on("disconnect", () => {
-    console.log(`User Disconnected: ${socket.id}`);
-  });
+  socket.on("disconnect", () => {});
 });
 
-server.listen(3010, () => {
-  console.log("server start!");
-});
+server.listen(3010, () => {});

@@ -20,7 +20,6 @@ export default function NotificationList({ currentUserId }) {
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log("Notification socket connected:", socket.id);
       socket.emit("join_room", { sender: currentUserId });
     });
     socket.on("receive_message", (msg) => {

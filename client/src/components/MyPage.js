@@ -29,7 +29,6 @@ export default function MyPage() {
       decoded = jwtDecode(token);
       setUserId(decoded.userId);
     } catch (err) {
-      console.log("JWT decode error:", err);
       localStorage.removeItem("token");
       navigate("/");
       return;
@@ -38,8 +37,6 @@ export default function MyPage() {
     fetch(`http://localhost:3010/user/${decoded.userId}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
-
         setUser(data.info);
         setFollow(data.follow || {}); // 팔로워, 팔로잉 정보
         setFeedCount(data.cnt || {}); // 게시물 수

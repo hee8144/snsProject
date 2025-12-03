@@ -102,7 +102,6 @@ function Publicchat() {
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
         }}
       >
-        {/* 🔹 헤더: 뒤로가기 버튼 + Public */}
         <Box
           sx={{
             p: 2,

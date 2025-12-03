@@ -128,9 +128,7 @@ function Join() {
       body: formData,
     })
       .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-      })
+      .then((data) => {})
       .catch((err) => {
         console.error(err);
       });
