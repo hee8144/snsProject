@@ -38,6 +38,48 @@
 </div>
 
 <div style="text-align:left;">
+  <h2 style="border-bottom: 1px solid #d8dee4; color: #282d33;">🛠️ 기술 스택</h2>
+  <table>
+    <tr>
+      <th>Frontend</th>
+      <th>Backend / DB</th>
+      <th>Others</th>
+    </tr>
+    <tr>
+      <td>
+        React (SPA, Hooks)<br>
+        Material UI (MUI): 반응형 및 컴포넌트 디자인<br>
+        Axios / Fetch API: 서버 통신
+      </td>
+      <td>
+        Node.js & Express: RESTful API 구축<br>
+        MySQL: 관계형 데이터베이스
+      </td>
+      <td>
+        bcrypt: 비밀번호 단방향 암호화<br>
+        jsonwebtoken (JWT): 사용자 인증 및 토큰 발급<br>
+        Multer: 파일 업로드 처리<br>
+        Socket.IO: 실시간 채팅 및 알림
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div style="text-align:left;">
+  <h2 style="border-bottom: 1px solid #d8dee4; color: #282d33;">📌 주요 기능</h2>
+  <ul>
+    <li>사용자 회원가입, 로그인, 프로필 관리</li>
+    <li>게시글 작성, 이미지 첨부, CodePen URL 삽입</li>
+    <li>게시글 좋아요, 댓글 작성 및 삭제</li>
+    <li>팔로우 / 팔로잉 기능으로 피드 필터링</li>
+    <li>무한 스크롤 기반 피드 페이지</li>
+    <li>실시간 공용 채팅 및 1:1 개인 채팅 (Socket.IO 활용)</li>
+    <li>알림(Notification) 시스템으로 메시지 및 활동 알림 제공</li>
+    <li>익명 게시글 작성 옵션</li>
+  </ul>
+</div>
+
+<div style="text-align:left;">
   <h2 style="border-bottom: 1px solid #d8dee4; color: #282d33;">📑 페이지별 기능</h2>
 
   <div align="center">
