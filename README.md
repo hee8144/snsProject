@@ -1,3 +1,7 @@
+<div align="center">
+  <h1 style="color: #282d33;">CODESHARE SNS 프로젝트</h1>
+</div>
+
 <div style="text-align:left;">
   <h2 style="border-bottom: 1px solid #d8dee4; color: #282d33;">💡 프로젝트 소개</h2>
   <ul>
@@ -31,19 +35,6 @@
       <td><a href="https://github.com/hee8144" target="_blank">https://github.com/hee8144</a></td>
     </tr>
   </table>
-</div>
-
-<div style="text-align:left;">
-  <h2 style="border-bottom: 1px solid #d8dee4; color: #282d33;">🛠️ 사용 언어</h2>
-  <div style="margin: 0 auto; text-align: left;">
-    <img src="https://img.shields.io/badge/JSP-007396?style=for-the-badge&logo=java&logoColor=white">
-    <img src="https://img.shields.io/badge/Servlet-000000?style=for-the-badge&logo=java&logoColor=white">
-    <img src="https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=java&logoColor=white">
-    <img src="https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white">
-    <img src="https://img.shields.io/badge/CSS-1572B6?style=for-the-badge&logo=css3&logoColor=white">
-    <img src="https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white">
-    <img src="https://img.shields.io/badge/Oracle-F80000?style=for-the-badge&logo=oracle&logoColor=white">
-  </div>
 </div>
 
 <div style="text-align:left;">
