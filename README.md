@@ -66,7 +66,7 @@
   
   <div align="center">
     <h4>등록 페이지</h4>
-    <img src="https://github.com/hee8144/image/blob/main/chatpage.png?raw=true" alt="등록 페이지" width="70%">
+    <img src="https://github.com/hee8144/image/blob/main/add.png?raw=true" alt="등록 페이지" width="70%">
     <p>
      사용자가 게시글 내용을 작성하고, 선택적으로 CodePen URL을 첨부할 수 있습니다.<br>
     이미지 파일을 여러 개 업로드 가능하며, 업로드 시 미리보기(썸네일) 표시 기능 제공.<br>
