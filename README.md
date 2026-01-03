@@ -1,44 +1,48 @@
 <div align="center">
-  <h1 style="color: #282d33;">CODESHARE SNS 프로젝트</h1>
+  <h1 style="color:#282d33;">CODESHARE SNS 프로젝트</h1>
 </div>
 
+<!-- 프로젝트 소개 -->
 <div style="text-align:left;">
-  <h2 style="border-bottom: 1px solid #d8dee4; color: #282d33;">💡 프로젝트 소개</h2>
+  <h2 style="border-bottom:1px solid #d8dee4; color:#282d33;">💡 프로젝트 소개</h2>
   <ul>
-    <li>사용자 간 소셜 네트워크(SNS) 기능을 제공하는 웹사이트입니다.</li>
-    <li>게시글 작성, 이미지 업로드, 코드펜 삽입, 댓글 작성, 좋아요 및 팔로우 기능을 지원합니다.</li>
-    <li>실시간 채팅 기능을 통해 공용 및 개인 메시지를 주고받을 수 있습니다.</li>
+    <li>사용자 간 소셜 네트워크(SNS) 기능을 제공하는 웹 서비스입니다.</li>
+    <li>게시글 작성, 이미지 업로드, CodePen 삽입, 댓글, 좋아요, 팔로우 기능을 지원합니다.</li>
+    <li>Socket.IO 기반 실시간 채팅으로 공용 및 1:1 메시지를 주고받을 수 있습니다.</li>
   </ul>
 </div>
 
+<!-- 개발 기간 -->
 <div style="text-align:left;">
-  <h2 style="border-bottom: 1px solid #d8dee4; color: #282d33;">🗓 개발 기간</h2>
+  <h2 style="border-bottom:1px solid #d8dee4; color:#282d33;">🗓 개발 기간</h2>
   <ul>
-    <li>
-      <h4>11/25 ~ 12/02</h4>
-      <ul>
-        <li>프로젝트 기획, DB 설계, 서비스 개발, 테스트 및 수정</li>
-      </ul>
-    </li>
+    <li><strong>11/25 ~ 12/02</strong></li>
+    <li>프로젝트 기획 · DB 설계 · 서비스 개발 · 테스트 및 수정</li>
   </ul>
 </div>
 
+<!-- 팀원 -->
 <div style="text-align:left;">
-  <h2 style="border-bottom: 1px solid #d8dee4; color: #282d33;">👨‍👩‍👦‍👦 팀원 구성</h2>
+  <h2 style="border-bottom:1px solid #d8dee4; color:#282d33;">👨‍👩‍👦‍👦 팀원 구성</h2>
   <table>
     <tr>
       <th>이름</th>
-      <th>GitHub 프로필</th>
+      <th>GitHub</th>
     </tr>
     <tr>
       <td>유희연</td>
-      <td><a href="https://github.com/hee8144" target="_blank">https://github.com/hee8144</a></td>
+      <td>
+        <a href="https://github.com/hee8144" target="_blank">
+          https://github.com/hee8144
+        </a>
+      </td>
     </tr>
   </table>
 </div>
 
+<!-- 기술 스택 -->
 <div style="text-align:left;">
-  <h2 style="border-bottom: 1px solid #d8dee4; color: #282d33;">🛠️ 기술 스택</h2>
+  <h2 style="border-bottom:1px solid #d8dee4; color:#282d33;">🛠️ 기술 스택</h2>
   <table>
     <tr>
       <th>Frontend</th>
@@ -48,80 +52,118 @@
     <tr>
       <td>
         React (SPA, Hooks)<br>
-        Material UI (MUI): 반응형 및 컴포넌트 디자인<br>
-        Axios / Fetch API: 서버 통신
+        Material UI (MUI)<br>
+        Axios / Fetch API
       </td>
       <td>
-        Node.js & Express: RESTful API 구축<br>
-        MySQL: 관계형 데이터베이스
+        Node.js / Express<br>
+        MySQL
       </td>
       <td>
-        bcrypt: 비밀번호 단방향 암호화<br>
-        jsonwebtoken (JWT): 사용자 인증 및 토큰 발급<br>
-        Multer: 파일 업로드 처리<br>
-        Socket.IO: 실시간 채팅 및 알림
+        JWT 인증<br>
+        bcrypt 암호화<br>
+        Multer (파일 업로드)<br>
+        Socket.IO (실시간 통신)
       </td>
     </tr>
   </table>
 </div>
 
+<!-- 주요 기능 -->
 <div style="text-align:left;">
-  <h2 style="border-bottom: 1px solid #d8dee4; color: #282d33;">📌 주요 기능</h2>
+  <h2 style="border-bottom:1px solid #d8dee4; color:#282d33;">📌 주요 기능</h2>
   <ul>
-    <li>사용자 회원가입, 로그인, 프로필 관리</li>
+    <li>회원가입 / 로그인 / 프로필 관리</li>
     <li>게시글 작성, 이미지 첨부, CodePen URL 삽입</li>
-    <li>게시글 좋아요, 댓글 작성 및 삭제</li>
-    <li>팔로우 / 팔로잉 기능으로 피드 필터링</li>
-    <li>무한 스크롤 기반 피드 페이지</li>
-    <li>실시간 공용 채팅 및 1:1 개인 채팅 (Socket.IO 활용)</li>
-    <li>알림(Notification) 시스템으로 메시지 및 활동 알림 제공</li>
-    <li>익명 게시글 작성 옵션</li>
+    <li>댓글 및 좋아요 기능</li>
+    <li>팔로우 / 팔로잉 기반 피드 필터링</li>
+    <li>무한 스크롤 피드</li>
+    <li>실시간 공용 채팅 및 1:1 채팅</li>
+    <li>알림(Notification) 시스템</li>
+    <li>익명 게시글 작성</li>
   </ul>
 </div>
 
+<!-- 페이지별 기능 -->
 <div style="text-align:left;">
-  <h2 style="border-bottom: 1px solid #d8dee4; color: #282d33;">📑 페이지별 기능</h2>
+  <h2 style="border-bottom:1px solid #d8dee4; color:#282d33;">📑 페이지별 기능</h2>
 
   <div align="center">
     <h4>메인 페이지 (Feed)</h4>
-    <img src="https://github.com/hee8144/image/blob/main/sns_feedpage.png?raw=true" alt="Feed 페이지" width="70%">
-    <p>사용자의 피드를 무한 스크롤로 로드하며, 이미지, 코드펜, 댓글, 좋아요, 팔로우 기능을 포함한 메인 화면입니다.</p>
+    <img src="https://github.com/hee8144/image/blob/main/sns_feedpage.png?raw=true" width="70%">
+    <p>
+      무한 스크롤 기반 피드 화면으로,<br>
+      게시글 · 이미지 · CodePen · 댓글 · 좋아요 · 팔로우 기능 제공
+    </p>
   </div>
+
+  <br>
 
   <div align="center">
     <h4>마이 페이지</h4>
-    <img src="https://github.com/hee8144/image/blob/main/sns_mypage.png?raw=true" alt="마이 페이지" width="70%">
+    <img src="https://github.com/hee8144/image/blob/main/sns_mypage.png?raw=true" width="70%">
     <p>
-      로그인한 사용자의 프로필 정보, 팔로워/팔로잉, 게시물 수를 확인할 수 있습니다.<br>
-      작성한 글과 좋아요한 글을 탭으로 전환하며 확인 가능하며, 프로필 수정 및 게시물 갱신이 실시간으로 반영됩니다.
+      프로필 정보, 팔로워/팔로잉, 게시물 수 확인 가능<br>
+      작성 글 / 좋아요한 글 탭 전환 및 실시간 반영
     </p>
   </div>
 
+  <br>
+
   <div align="center">
     <h4>채팅 페이지</h4>
-    <img src="https://github.com/hee8144/image/blob/main/chatpage.png?raw=true" alt="채팅 페이지" width="70%">
+    <img src="https://github.com/hee8144/image/blob/main/chatpage.png?raw=true" width="70%">
     <p>
-      로그인한 사용자의 모든 채팅방 목록을 불러와 보여주며, 공용 채팅과 1:1 개인 채팅으로 구분하여 입장이 가능합니다.<br>
-      각 채팅방의 최근 메시지와 읽지 않은 메시지 수를 표시하여 알림 역할을 합니다.
+      공용 채팅 및 1:1 채팅 제공<br>
+      최근 메시지 및 읽지 않은 메시지 수 표시
     </p>
   </div>
-  
+
+  <br>
+
   <div align="center">
-    <h4>등록 페이지</h4>
-    <img src="https://github.com/hee8144/image/blob/main/add.png?raw=true" alt="등록 페이지" width="70%">
+    <h4>게시글 등록 페이지</h4>
+    <img src="https://github.com/hee8144/image/blob/main/add.png?raw=true" width="70%">
     <p>
-     사용자가 게시글 내용을 작성하고, 선택적으로 CodePen URL을 첨부할 수 있습니다.<br>
-    이미지 파일을 여러 개 업로드 가능하며, 업로드 시 미리보기(썸네일) 표시 기능 제공.<br>
-    익명 등록 체크박스를 통해 게시글을 익명으로 작성 가능.
+      게시글 작성 및 CodePen URL 첨부 가능<br>
+      다중 이미지 업로드 및 미리보기 지원<br>
+      익명 게시글 작성 옵션 제공
     </p>
   </div>
 </div>
 
+<!-- 트러블슈팅 -->
 <div style="text-align:left;">
-  <h2 style="border-bottom: 1px solid #d8dee4; color: #282d33;">🎇 프로젝트 후기</h2>
+  <h2 style="border-bottom:1px solid #d8dee4; color:#282d33;">🔧 트러블슈팅</h2>
+
+  <h3>① 사용자 권한별 화면 분기 문제</h3>
+  <div align="center">
+    <img src="https://github.com/hee8144/image/blob/main/sns_mypage.png?raw=true" width="70%">
+  </div>
+  <ul>
+    <li><strong>문제</strong>: 로그인 후 모든 사용자가 동일 화면 접근</li>
+    <li><strong>해결</strong>: JWT 토큰에 role 저장 후 조건부 라우팅</li>
+    <li><strong>배운 점</strong>: 권한 설계는 초기 구조 단계에서 중요</li>
+  </ul>
+
+  <hr>
+
+  <h3>③ 이미지 다중 업로드 미리보기 문제</h3>
+  <div align="center">
+    <img src="https://github.com/hee8144/image/blob/main/add.png?raw=true" width="70%">
+  </div>
+  <ul>
+    <li><strong>문제</strong>: 다중 이미지 미리보기 렌더링 오류</li>
+    <li><strong>해결</strong>: URL.createObjectURL + Multer 처리</li>
+    <li><strong>배운 점</strong>: 클라이언트·서버 역할 분리의 중요성</li>
+  </ul>
+</div>
+
+<!-- 프로젝트 후기 -->
+<div style="text-align:left;">
+  <h2 style="border-bottom:1px solid #d8dee4; color:#282d33;">🎇 프로젝트 후기</h2>
   <p align="center">
-    이번 프로젝트를 통해 React와 Vue.js의 차이점을 이해할 수 있었고,<br>
-    Socket.IO를 활용한 실시간 통신 구현 방법을 익히는 좋은 경험이 되었습니다.<br>
-    실제 SNS 서비스를 개발하는 과정을 경험할 수 있어 많은 도움이 되었습니다.
+    React 기반 SPA 구조 이해 및 실시간 통신 구현 경험을 쌓을 수 있었으며,<br>
+    실제 SNS 서비스 흐름을 직접 설계·구현해본 의미 있는 프로젝트였습니다.
   </p>
 </div>
