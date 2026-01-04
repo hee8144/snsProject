@@ -136,15 +136,7 @@
 <div style="text-align:left;">
   <h2 style="border-bottom:1px solid #d8dee4; color:#282d33;">🔧 트러블슈팅</h2>
 
-  <h3>① 사용자 권한별 화면 분기 문제</h3>
-  <div align="center">
-    <img src="https://github.com/hee8144/image/blob/main/sns_mypage.png?raw=true" width="70%">
-  </div>
-  <ul>
-    <li><strong>문제</strong>: 로그인 후 모든 사용자가 동일 화면 접근</li>
-    <li><strong>해결</strong>: JWT 토큰에 role 저장 후 조건부 라우팅</li>
-    <li><strong>배운 점</strong>: 권한 설계는 초기 구조 단계에서 중요</li>
-  </ul>
+  <div align="center"> <img src="https://github.com/hee8144/image/blob/main/add.png?raw=true" width="70%"> </div> <ul> <li><strong>문제</strong>: CodePen 링크를 가져온 후, 게시글 수정 화면에서 해당 CodePen 내용을 직접 수정할 수 있도록 구현하려 했으나 외부 서비스(CodePen)의 iframe 보안 정책으로 인해 내부 콘텐츠 접근 및 수정이 불가능했습니다. </li> <li><strong>해결</strong>: CodePen 내부 코드를 직접 수정하는 방식 대신, 사용자가 입력한 CodePen URL을 Embed URL 형식으로 변환하여 게시글에 미리보기 형태로 출력하는 구조로 변경했습니다. </li> <li><strong>배운 점</strong>: 외부 서비스 연동 시 보안 정책과 기술적 한계를 고려한 설계가 중요하며, 기능 구현이 어려운 경우 사용자 경험을 해치지 않는 대안 방식을 선택하는 것이 필요하다는 것을 배웠습니다. </li> </ul>
 
   <hr>
 
