@@ -71,7 +71,7 @@
 
   <div align="center">
     <h4>메인 페이지 (Feed)</h4>
-    <img src="https://github.com/hee8144/image/blob/main/sns_feedpage.png?raw=true" width="720" height="360" style="object-fit:contain;">
+    <img src="https://github.com/hee8144/image/blob/main/sns_feedpage.png?raw=true" width="360" height="360" style="object-fit:contain;">
     <p>
       무한 스크롤 기반 피드 화면으로,<br>
       게시글 · 이미지 · CodePen · 댓글 · 좋아요 · 팔로우 기능 제공
@@ -82,7 +82,7 @@
 
   <div align="center">
     <h4>마이 페이지</h4>
-    <img src="https://github.com/hee8144/image/blob/main/sns_mypage.png?raw=true" width="720" height="360" style="object-fit:contain;">
+    <img src="https://github.com/hee8144/image/blob/main/sns_mypage.png?raw=true" width="360" height="360" style="object-fit:contain;">
     <p>
       프로필 정보, 팔로워/팔로잉, 게시물 수 확인 가능<br>
       작성 글 / 좋아요한 글 탭 전환 및 실시간 반영
@@ -93,7 +93,7 @@
 
   <div align="center">
     <h4>채팅 페이지</h4>
-    <img src="https://github.com/hee8144/image/blob/main/chatpage.png?raw=true" width="720" height="360" style="object-fit:contain;">
+    <img src="https://github.com/hee8144/image/blob/main/chatpage.png?raw=true" width="360" height="360" style="object-fit:contain;">
     <p>
       공용 채팅 및 1:1 채팅 제공<br>
       최근 메시지 및 읽지 않은 메시지 수 표시
@@ -104,7 +104,7 @@
 
   <div align="center">
     <h4>게시글 등록 페이지</h4>
-    <img src="https://github.com/hee8144/image/blob/main/add.png?raw=true" width="720" height="360" style="object-fit:contain;">
+    <img src="https://github.com/hee8144/image/blob/main/add.png?raw=true" width="360" height="360" style="object-fit:contain;">
     <p>
       게시글 작성 및 CodePen URL 첨부 가능<br>
       다중 이미지 업로드 및 미리보기 지원<br>
